@@ -1,0 +1,245 @@
+import json
+from datetime import timedelta
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.sessions.models import Session
+from django.db import IntegrityError
+from django.http import JsonResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import Order, Product
+
+
+def product_payload(product):
+    return {
+        'id': product.id,
+        'title': product.title,
+        'category': product.category,
+        'form': product.form,
+        'price': product.price,
+        'popular': product.popular,
+        'tone': product.tone,
+        'image_url': product.image_url,
+        'description': product.description,
+    }
+
+
+def user_payload(user):
+    return {
+        'id': user.id,
+        'name': user.first_name or user.username,
+        'email': user.email,
+        'username': user.username,
+        'is_admin': user.is_staff or user.is_superuser,
+    }
+
+
+def admin_required(request):
+    if request.GET.get('admin') == 'admin@herbarium.ru':
+        return True
+    if request.META.get('HTTP_X_HERBARIUM_ADMIN') == 'admin@herbarium.ru':
+        return True
+    return request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+
+
+def read_json(request):
+    try:
+        return json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return {}
+
+
+def products(request):
+    items = [product_payload(product) for product in Product.objects.all()]
+    return JsonResponse({'products': items})
+
+
+@csrf_exempt
+def admin_products(request):
+    if not admin_required(request):
+        return JsonResponse({'detail': 'Forbidden'}, status=403)
+
+    if request.method == 'GET':
+        return JsonResponse({'products': [product_payload(product) for product in Product.objects.all()]})
+
+    if request.method == 'POST':
+        payload = read_json(request)
+        product = Product.objects.create(
+            title=payload.get('title', '').strip() or 'Новый сбор',
+            category=payload.get('category', '').strip() or 'Травяные сборы',
+            form=payload.get('form', '').strip() or 'Пакет',
+            price=int(payload.get('price') or 0),
+            popular=bool(payload.get('popular')),
+            tone=payload.get('tone', '').strip() or 'from-lime-200 to-emerald-500',
+            image_url=payload.get('image_url', '').strip(),
+            description=payload.get('description', '').strip(),
+        )
+        return JsonResponse({'product': product_payload(product)}, status=201)
+
+    return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def admin_product_detail(request, product_id):
+    if not admin_required(request):
+        return JsonResponse({'detail': 'Forbidden'}, status=403)
+
+    try:
+        product = Product.objects.get(pk=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'detail': 'Not found'}, status=404)
+
+    if request.method == 'DELETE':
+        product.delete()
+        return JsonResponse({'ok': True})
+
+    if request.method == 'PUT':
+        payload = read_json(request)
+        for field in ['title', 'category', 'form', 'tone', 'image_url', 'description']:
+            if field in payload:
+                setattr(product, field, payload.get(field) or '')
+        if 'price' in payload:
+            product.price = int(payload.get('price') or 0)
+        if 'popular' in payload:
+            product.popular = bool(payload.get('popular'))
+        product.save()
+        return JsonResponse({'product': product_payload(product)})
+
+    return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+
+def admin_summary(request):
+    if not admin_required(request):
+        return JsonResponse({'detail': 'Forbidden'}, status=403)
+
+    orders_qs = Order.objects.all()
+    orders = orders_qs.count()
+    products_count = Product.objects.count()
+    users_count = User.objects.count()
+    online = Session.objects.filter(expire_date__gte=timezone.now()).count()
+    revenue = 0
+    purchases = 0
+    for order in orders_qs:
+        for item in order.payload.get('items', []):
+            qty = int(item.get('qty') or 1)
+            price = int(item.get('price') or 0)
+            purchases += qty
+            revenue += price * qty
+
+    today = timezone.localdate()
+    chart = []
+    for offset in range(6, -1, -1):
+        day = today - timedelta(days=offset)
+        day_orders = orders_qs.filter(created_at__date=day).count()
+        chart.append({'label': day.strftime('%d.%m'), 'value': day_orders})
+
+    return JsonResponse({
+        'stats': {
+            'online': online,
+            'orders': orders,
+            'purchases': purchases,
+            'products': products_count,
+            'users': users_count,
+            'revenue': revenue,
+        },
+        'chart': chart,
+    })
+
+
+@csrf_exempt
+def admin_users(request):
+    if not admin_required(request):
+        return JsonResponse({'detail': 'Forbidden'}, status=403)
+
+    if request.method == 'GET':
+        return JsonResponse({'users': [user_payload(user) for user in User.objects.all().order_by('id')]})
+
+    if request.method == 'POST':
+        payload = read_json(request)
+        user_id = payload.get('user_id')
+        is_admin = bool(payload.get('is_admin'))
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'detail': 'Not found'}, status=404)
+        user.is_staff = is_admin
+        user.save()
+        return JsonResponse({'user': user_payload(user)})
+
+    return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+
+def session(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'user': user_payload(request.user)})
+    return JsonResponse({'user': None})
+
+
+@csrf_exempt
+def login_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+    payload = read_json(request)
+    email = payload.get('email', '').strip()
+    password = payload.get('password', '')
+
+    user_obj = User.objects.filter(email=email).first() or User.objects.filter(username=email).first()
+    username = user_obj.username if user_obj else email
+    user = authenticate(request, username=username, password=password)
+
+    if user is None:
+        return JsonResponse({'detail': 'Неверный email или пароль'}, status=400)
+
+    login(request, user)
+    return JsonResponse({'user': user_payload(user)})
+
+
+@csrf_exempt
+def register_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+    payload = read_json(request)
+    name = payload.get('name', '').strip() or 'Покупатель'
+    email = payload.get('email', '').strip().lower()
+    password = payload.get('password', '')
+
+    if not email or not password:
+        return JsonResponse({'detail': 'Укажите email и пароль'}, status=400)
+
+    try:
+        user = User.objects.create_user(username=email, email=email, password=password, first_name=name)
+    except IntegrityError:
+        return JsonResponse({'detail': 'Пользователь уже существует'}, status=400)
+
+    login(request, user)
+    return JsonResponse({'user': user_payload(user)}, status=201)
+
+
+@csrf_exempt
+def logout_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+    logout(request)
+    return JsonResponse({'ok': True})
+
+
+@csrf_exempt
+def orders(request):
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+    payload = read_json(request)
+    order = Order.objects.create(
+        user=request.user if request.user.is_authenticated else None,
+        name=payload.get('name', ''),
+        phone=payload.get('phone', ''),
+        city=payload.get('city', ''),
+        address=payload.get('address', ''),
+        comment=payload.get('comment', ''),
+        payload=payload,
+    )
+    return JsonResponse({'ok': True, 'order_id': order.id})
