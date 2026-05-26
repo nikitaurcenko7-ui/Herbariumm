@@ -199,13 +199,17 @@ textarea {
   height: 100vh;
   border: 1px solid var(--border);
   border-radius: 0;
-  background: var(--header);
+  background: #f8fffb;
   padding: 0 0 0.9rem;
   box-shadow: 0 24px 70px rgba(15, 71, 45, 0.24);
   opacity: 0;
   pointer-events: none;
   transform: translateX(102%);
   transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+:root[data-theme='dark'] .mobile-menu {
+  background: #07140d;
 }
 
 .mobile-menu.open {
@@ -218,7 +222,7 @@ textarea {
   position: fixed;
   inset: 0;
   z-index: 69;
-  background: rgba(7, 23, 13, 0.18);
+  background: rgba(7, 23, 13, 0.34);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.24s ease;
@@ -443,8 +447,11 @@ textarea {
 }
 
 .filter-panel {
+  position: relative;
+  z-index: 12;
   display: grid;
   gap: 0.75rem;
+  overflow: visible;
 }
 
 .custom-select {
@@ -458,6 +465,10 @@ textarea {
 
 .custom-select + .custom-select + .custom-select {
   z-index: 3;
+}
+
+.custom-select.open {
+  z-index: 20;
 }
 
 .custom-select > button {
@@ -499,11 +510,12 @@ textarea {
   top: calc(100% + 0.35rem);
   left: 0;
   right: 0;
+  z-index: 25;
   max-height: min(520px, 70vh);
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(248, 255, 250, 0.97);
+  background: #f8fffa;
   box-shadow: 0 20px 45px rgba(19, 83, 54, 0.2);
   animation: dropdownIn 0.18s ease both;
 }
@@ -1686,6 +1698,83 @@ textarea {
 }
 
 @media (max-width: 720px) {
+  .site-main {
+    padding-top: 1.25rem;
+  }
+
+  .mobile-menu {
+    width: min(360px, 88vw);
+  }
+
+  .mobile-menu button {
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.25;
+    padding: 0.78rem 1.35rem;
+  }
+
+  .mobile-menu-head {
+    padding: 0.85rem 1rem;
+  }
+
+  .mobile-menu-head .brand {
+    font-size: 1.12rem;
+  }
+
+  .mobile-menu-head .icon-btn {
+    min-width: 2.65rem;
+    height: 2.65rem;
+  }
+
+  .hero {
+    min-height: 0;
+    padding: 1.55rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 11vw, 2.8rem);
+    line-height: 1.03;
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .panel {
+    padding: 1rem;
+  }
+
+  .filter-panel {
+    z-index: 14;
+  }
+
+  .custom-select,
+  .custom-select + .custom-select,
+  .custom-select + .custom-select + .custom-select {
+    z-index: auto;
+  }
+
+  .custom-select.open {
+    z-index: 18;
+  }
+
+  .custom-options {
+    position: static;
+    max-height: min(320px, 54vh);
+    margin-top: 0.35rem;
+    background: #f8fffa;
+    box-shadow: 0 12px 28px rgba(19, 83, 54, 0.14);
+  }
+
+  :root[data-theme='dark'] .custom-options {
+    background: #041b0e;
+  }
+
+  .custom-options button {
+    min-height: 2.75rem;
+  }
+
   .product-card {
     min-height: 0;
   }
@@ -1716,10 +1805,6 @@ textarea {
     flex-direction: column;
   }
 
-  .hero {
-    min-height: 320px;
-  }
-
   .flower-bg {
     opacity: 0.16;
   }
@@ -1729,18 +1814,79 @@ textarea {
   }
 
   .harvest-slide-layout {
+    height: auto;
+    min-height: 0;
     grid-template-columns: 1fr;
   }
 
-  .harvest-art,
-  .harvest-art img,
-  .harvest-copy {
-    height: auto;
-    min-height: 260px;
+  .harvest-art {
+    height: clamp(220px, 62vw, 300px);
+    min-height: 0;
+  }
+
+  .harvest-art img {
+    height: 100%;
+    min-height: 0;
   }
 
   .harvest-copy {
-    padding-bottom: 3rem;
+    height: auto;
+    min-height: 0;
+    justify-content: flex-start;
+    padding: 1.15rem 1rem 3rem;
+  }
+
+  .harvest-copy h3 {
+    font-size: clamp(1.55rem, 8vw, 2.15rem);
+  }
+
+  .harvest-copy p {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .slider-arrow {
+    top: clamp(110px, 31vw, 150px);
+  }
+
+  .partner-logo {
+    min-height: 88px;
+    padding: 0.65rem;
+  }
+
+  .partner-logo img {
+    max-width: 76px;
+    max-height: 30px;
+  }
+
+  .partner-logo span {
+    font-size: 0.78rem;
+    line-height: 1.2;
+  }
+
+  .faq-panel {
+    min-height: 0;
+  }
+
+  .faq-item,
+  .faq-item.active {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .faq-question {
+    align-items: flex-start;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .faq-answer {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .faq-item.active .faq-answer {
+    max-height: 12rem;
   }
 
   .footer {
@@ -1809,5 +1955,11 @@ textarea {
 
   .order-total {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-menu {
+    width: 100vw;
   }
 }
