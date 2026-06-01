@@ -21,13 +21,4 @@ class OrderAdmin(admin.ModelAdmin):
 class SupplyRequestAdmin(admin.ModelAdmin):
     list_display = ("id", "company", "phone", "contact", "volume", "created_at")
     search_fields = ("company", "phone", "contact", "comment")
-    readonly_fields = ("user", "company", "phone", "contact", "volume", "comment", "payload", "created_at")
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+    readonly_fields = ("created_at",)
