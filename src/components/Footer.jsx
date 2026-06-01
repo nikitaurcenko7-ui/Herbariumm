@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import forestFooter from '../assets/forest-footer.png'
 
-export default function Footer({ navigate }) {
+export default function Footer({ navigate, user }) {
+  const [sent, setSent] = useState(false)
+  const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
+
   return (
     <footer className="footer">
       <img src={forestFooter} alt="" />
@@ -14,14 +17,24 @@ export default function Footer({ navigate }) {
         </div>
         <form id="supply-form" className="panel">
           <h3 className="font-bold">Заявка на крупную поставку</h3>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <input placeholder="Компания или ИП" />
-            <input placeholder="Телефон" />
-            <input placeholder="Контакт" />
-            <input placeholder="Плановый объем в месяц" />
-          </div>
-          <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" />
-          <button type="button" onClick={() => navigate('contacts')} className="btn-primary mt-3 w-full">Отправить заявку</button>
+          {user ? (
+            <>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <input placeholder="Компания или ИП" />
+                <input placeholder="Телефон" />
+                <input key={contactValue || 'contact'} placeholder="Контакт" defaultValue={contactValue} />
+                <input placeholder="Плановый объем в месяц" />
+              </div>
+              <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" />
+              <button type="button" onClick={() => setSent(true)} className="btn-primary mt-3 w-full">Отправить заявку</button>
+              {sent && <p className="success-text">Заявка принята. Мы свяжемся по указанным контактам.</p>}
+            </>
+          ) : (
+            <>
+              <p className="muted mt-3 text-sm">Чтобы отправить оптовую заявку, сначала войдите в аккаунт.</p>
+              <button type="button" onClick={() => navigate('login')} className="btn-primary mt-3 w-full">Войти в аккаунт</button>
+            </>
+          )}
         </form>
       </div>
     </footer>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
-import { harvestSlides } from '../data/siteData.js'
+import { harvestSlides, scrollToSupplyForm } from '../data/siteData.js'
 import { ProductGrid } from '../components/Product.jsx'
 import { InfoCard } from '../components/Cards.jsx'
 
@@ -81,7 +81,7 @@ export default function Home({ navigate, addToCart, products }) {
           <h2>Нужна оптовая поставка для сети?</h2>
           <p>Оставьте заявку в форме ниже. Ответим в течение рабочего дня.</p>
         </div>
-        <button onClick={() => navigate('contacts')} className="btn-primary">Узнать условия</button>
+        <button onClick={() => scrollToSupplyForm(navigate)} className="btn-primary">Узнать условия</button>
       </section>
     </div>
   )
