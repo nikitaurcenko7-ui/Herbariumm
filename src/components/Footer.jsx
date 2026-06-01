@@ -1,23 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import forestFooter from '../assets/forest-footer.png'
 
-export default function Footer({ navigate, user }) {
-  const [sent, setSent] = useState(false)
-  const [authError, setAuthError] = useState(false)
-  const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
-
-  const submitSupplyRequest = () => {
-    if (!user) {
-      setSent(false)
-      setAuthError(true)
-      window.setTimeout(() => navigate('login'), 700)
-      return
-    }
-
-    setAuthError(false)
-    setSent(true)
-  }
-
+export default function Footer({ navigate }) {
   return (
     <footer className="footer">
       <img src={forestFooter} alt="" />
@@ -33,15 +17,11 @@ export default function Footer({ navigate, user }) {
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <input placeholder="Компания или ИП" />
             <input placeholder="Телефон" />
-            <input key={contactValue || 'guest-contact'} placeholder="Контакт" defaultValue={contactValue} />
+            <input placeholder="Контакт" />
             <input placeholder="Плановый объем в месяц" />
           </div>
           <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" />
-          <button type="button" onClick={submitSupplyRequest} className="btn-primary mt-3 w-full">
-            {user ? 'Отправить заявку' : 'Войти, чтобы отправить заявку'}
-          </button>
-          {authError && <p className="error-text">Для отправки оптовой заявки нужно войти в аккаунт.</p>}
-          {sent && <p className="success-text">Заявка принята. Мы свяжемся по указанным контактам.</p>}
+          <button type="button" onClick={() => navigate('contacts')} className="btn-primary mt-3 w-full">Отправить заявку</button>
         </form>
       </div>
     </footer>
