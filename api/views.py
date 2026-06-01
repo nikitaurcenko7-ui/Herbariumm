@@ -11,6 +11,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Order, Product, SupplyRequest
 
+MAIN_ADMIN_EMAIL = 'admin@herbarium.ru'
+MAIN_ADMIN_USERNAME = 'admin'
+
 
 def product_payload(product):
     return {
@@ -37,11 +40,15 @@ def user_payload(user):
 
 
 def admin_required(request):
-    if request.GET.get('admin') == 'admin@herbarium.ru':
+    if request.GET.get('admin') == MAIN_ADMIN_EMAIL:
         return True
-    if request.META.get('HTTP_X_HERBARIUM_ADMIN') == 'admin@herbarium.ru':
+    if request.META.get('HTTP_X_HERBARIUM_ADMIN') == MAIN_ADMIN_EMAIL:
         return True
     return request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+
+
+def is_main_admin(user):
+    return user.username == MAIN_ADMIN_USERNAME or user.email == MAIN_ADMIN_EMAIL
 
 
 def read_json(request):
@@ -164,6 +171,14 @@ def admin_users(request):
             user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return JsonResponse({'detail': 'Not found'}, status=404)
+
+        if is_main_admin(user):
+            user.email = MAIN_ADMIN_EMAIL
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            return JsonResponse({'user': user_payload(user)})
+
         user.is_staff = is_admin
         user.save()
         return JsonResponse({'user': user_payload(user)})
