@@ -1,11 +1,20 @@
 import React, { useState } from 'react'
 import forestFooter from '../assets/forest-footer.png'
 
-export default function Footer({ user }) {
+export default function Footer({ navigate, user }) {
   const [sent, setSent] = useState(false)
+  const [authError, setAuthError] = useState(false)
   const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
 
   const submitSupplyRequest = () => {
+    if (!user) {
+      setSent(false)
+      setAuthError(true)
+      window.setTimeout(() => navigate('login'), 700)
+      return
+    }
+
+    setAuthError(false)
     setSent(true)
   }
 
@@ -28,7 +37,10 @@ export default function Footer({ user }) {
             <input placeholder="Плановый объем в месяц" />
           </div>
           <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" />
-          <button type="button" onClick={submitSupplyRequest} className="btn-primary mt-3 w-full">Отправить заявку</button>
+          <button type="button" onClick={submitSupplyRequest} className="btn-primary mt-3 w-full">
+            {user ? 'Отправить заявку' : 'Войти, чтобы отправить заявку'}
+          </button>
+          {authError && <p className="error-text">Для отправки оптовой заявки нужно войти в аккаунт.</p>}
           {sent && <p className="success-text">Заявка принята. Мы свяжемся по указанным контактам.</p>}
         </form>
       </div>
