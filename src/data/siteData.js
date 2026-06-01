@@ -20,12 +20,6 @@ export const harvestSlides = [
 ]
 
 export function scrollToSupplyForm(navigate) {
-  const form = document.getElementById('supply-form')
-  if (form) {
-    form.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    return
-  }
-
   navigate('home')
   window.setTimeout(() => {
     document.getElementById('supply-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
