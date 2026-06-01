@@ -120,7 +120,7 @@ function App() {
     home: <Home {...pageProps} />,
     catalog: <Catalog {...pageProps} />,
     delivery: <Delivery />,
-    contacts: <Contacts navigate={navigate} />,
+    contacts: <Contacts navigate={navigate} user={user} />,
     login: <Login {...pageProps} />,
     register: <Register {...pageProps} />,
     forgot: <ForgotPassword navigate={navigate} />,

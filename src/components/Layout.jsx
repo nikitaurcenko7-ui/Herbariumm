@@ -17,7 +17,7 @@ export default function Layout({ children, route, navigate, user, onLogout, cart
       <main className="site-main relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-7">
         <div key={route} className="page-transition">{children}</div>
       </main>
-      <Footer navigate={navigate} />
+      <Footer navigate={navigate} user={user} />
       <ChatBubble />
     </div>
   )

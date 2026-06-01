@@ -3,7 +3,7 @@ import { MapPin } from 'lucide-react'
 import { ContactCard } from '../components/Cards.jsx'
 import { scrollToSupplyForm } from '../data/siteData.js'
 
-export default function Contacts({ navigate }) {
+export default function Contacts({ navigate, user }) {
   return (
     <div>
       <h1 className="page-title">Контакты Herbarium</h1>
@@ -16,7 +16,7 @@ export default function Contacts({ navigate }) {
           <p className="eyebrow">Оптовая заявка</p>
           <h3 className="mt-2 text-xl font-bold">Заполните форму</h3>
           <p className="muted mt-2 text-sm">Напишите объем, фасовку и комментарий к поставке, а менеджер подготовит предложение.</p>
-          <button onClick={() => scrollToSupplyForm(navigate)} className="btn-primary mt-4">Перейти к форме</button>
+          <button onClick={() => scrollToSupplyForm(navigate, Boolean(user))} className="btn-primary mt-4">Перейти к форме</button>
         </div>
       </div>
       <div className="panel mt-3 overflow-hidden p-0">

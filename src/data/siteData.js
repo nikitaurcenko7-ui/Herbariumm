@@ -19,7 +19,15 @@ export const harvestSlides = [
   { title: 'Фасовка и отправка', text: 'Упаковываем сборы в защитную тару и передаем заказ в доставку в течение суток.', image: harvest5 }
 ]
 
-export function scrollToSupplyForm(navigate) {
+export function scrollToSupplyForm(navigate, preferCurrentPage = false) {
+  if (preferCurrentPage) {
+    const form = document.getElementById('supply-form')
+    if (form) {
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
+  }
+
   navigate('home')
   window.setTimeout(() => {
     document.getElementById('supply-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })

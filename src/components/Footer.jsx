@@ -1,7 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 import forestFooter from '../assets/forest-footer.png'
 
-export default function Footer({ navigate }) {
+export default function Footer({ navigate, user }) {
+  const [sent, setSent] = useState(false)
+  const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
+
+  const submitSupplyRequest = () => {
+    if (!user) {
+      navigate('contacts')
+      return
+    }
+
+    setSent(true)
+  }
+
   return (
     <footer className="footer">
       <img src={forestFooter} alt="" />
@@ -17,11 +29,12 @@ export default function Footer({ navigate }) {
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <input placeholder="Компания или ИП" />
             <input placeholder="Телефон" />
-            <input placeholder="Контакт" />
+            <input key={contactValue || 'guest-contact'} placeholder="Контакт" defaultValue={contactValue} />
             <input placeholder="Плановый объем в месяц" />
           </div>
           <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" />
-          <button type="button" onClick={() => navigate('contacts')} className="btn-primary mt-3 w-full">Отправить заявку</button>
+          <button type="button" onClick={submitSupplyRequest} className="btn-primary mt-3 w-full">Отправить заявку</button>
+          {sent && <p className="success-text">Заявка принята. Мы свяжемся по указанным контактам.</p>}
         </form>
       </div>
     </footer>
