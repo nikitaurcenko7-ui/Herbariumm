@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Order, Product
+from .models import Order, Product, SupplyRequest
 
 
 def product_payload(product):
@@ -243,3 +243,30 @@ def orders(request):
         payload=payload,
     )
     return JsonResponse({'ok': True, 'order_id': order.id})
+
+
+@csrf_exempt
+def supply_requests(request):
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+    payload = read_json(request)
+    user = request.user if request.user.is_authenticated else None
+    user_email = payload.get('user_email', '').strip().lower()
+
+    if user is None and user_email:
+        user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
+
+    if user is None:
+        return JsonResponse({'detail': 'Войдите в аккаунт, чтобы отправить оптовую заявку'}, status=403)
+
+    supply_request = SupplyRequest.objects.create(
+        user=user,
+        company=payload.get('company', '').strip(),
+        phone=payload.get('phone', '').strip(),
+        contact=payload.get('contact', '').strip(),
+        volume=payload.get('volume', '').strip(),
+        comment=payload.get('comment', '').strip(),
+        payload=payload,
+    )
+    return JsonResponse({'ok': True, 'request_id': supply_request.id}, status=201)

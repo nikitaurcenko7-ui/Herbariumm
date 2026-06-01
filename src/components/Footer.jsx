@@ -1,17 +1,49 @@
 import React, { useState } from 'react'
 import forestFooter from '../assets/forest-footer.png'
+import { api } from '../lib/api.js'
 
 export default function Footer({ navigate, user }) {
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
   const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
+  const [form, setForm] = useState({
+    company: '',
+    phone: '',
+    contact: contactValue,
+    volume: '',
+    comment: '',
+  })
 
-  const submitSupplyRequest = () => {
+  const setField = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }))
+    setSent(false)
+    setError('')
+  }
+
+  const submitSupplyRequest = async () => {
     if (!user) {
       navigate('contacts')
       return
     }
 
-    setSent(true)
+    setSending(true)
+    setError('')
+    try {
+      await api('/supply-requests/', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...form,
+          contact: form.contact || contactValue,
+          user_email: user.email,
+        }),
+      })
+      setSent(true)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -27,13 +59,16 @@ export default function Footer({ navigate, user }) {
         <form id="supply-form" className="panel">
           <h3 className="font-bold">Заявка на крупную поставку</h3>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <input placeholder="Компания или ИП" />
-            <input placeholder="Телефон" />
-            <input key={contactValue || 'guest-contact'} placeholder="Контакт" defaultValue={contactValue} />
-            <input placeholder="Плановый объем в месяц" />
+            <input placeholder="Компания или ИП" value={form.company} onChange={(event) => setField('company', event.target.value)} />
+            <input placeholder="Телефон" value={form.phone} onChange={(event) => setField('phone', event.target.value)} />
+            <input key={contactValue || 'guest-contact'} placeholder="Контакт" value={form.contact || contactValue} onChange={(event) => setField('contact', event.target.value)} />
+            <input placeholder="Плановый объем в месяц" value={form.volume} onChange={(event) => setField('volume', event.target.value)} />
           </div>
-          <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" />
-          <button type="button" onClick={submitSupplyRequest} className="btn-primary mt-3 w-full">Отправить заявку</button>
+          <textarea className="mt-2" placeholder="Комментарий: ассортимент, фасовка и доставка" value={form.comment} onChange={(event) => setField('comment', event.target.value)} />
+          <button type="button" onClick={submitSupplyRequest} disabled={sending} className="btn-primary mt-3 w-full disabled:opacity-60">
+            {sending ? 'Отправляем...' : 'Отправить заявку'}
+          </button>
+          {error && <p className="error-text">{error}</p>}
           {sent && <p className="success-text">Заявка принята. Мы свяжемся по указанным контактам.</p>}
         </form>
       </div>

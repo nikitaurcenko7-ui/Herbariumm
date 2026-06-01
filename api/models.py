@@ -34,3 +34,20 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Order #{self.pk}'
+
+
+class SupplyRequest(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    company = models.CharField(max_length=160, blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+    contact = models.CharField(max_length=160, blank=True)
+    volume = models.CharField(max_length=120, blank=True)
+    comment = models.TextField(blank=True)
+    payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Supply request #{self.pk}'
