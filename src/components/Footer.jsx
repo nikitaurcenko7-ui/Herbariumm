@@ -6,6 +6,7 @@ export default function Footer({ navigate, user }) {
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [authNotice, setAuthNotice] = useState(false)
   const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
   const [form, setForm] = useState({
     company: '',
@@ -19,11 +20,15 @@ export default function Footer({ navigate, user }) {
     setForm((current) => ({ ...current, [field]: value }))
     setSent(false)
     setError('')
+    setAuthNotice(false)
   }
 
   const submitSupplyRequest = async () => {
     if (!user) {
-      navigate('contacts')
+      setSent(false)
+      setError('')
+      setAuthNotice(true)
+      window.setTimeout(() => navigate('register'), 900)
       return
     }
 
@@ -68,6 +73,7 @@ export default function Footer({ navigate, user }) {
           <button type="button" onClick={submitSupplyRequest} disabled={sending} className="btn-primary mt-3 w-full disabled:opacity-60">
             {sending ? 'Отправляем...' : 'Отправить заявку'}
           </button>
+          {authNotice && <p className="error-text">Чтобы отправить оптовую заявку, зарегистрируйтесь или войдите в аккаунт.</p>}
           {error && <p className="error-text">{error}</p>}
           {sent && <p className="success-text">Заявка принята. Мы свяжемся по указанным контактам.</p>}
         </form>
