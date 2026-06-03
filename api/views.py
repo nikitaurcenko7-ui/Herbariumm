@@ -267,10 +267,24 @@ def supply_requests(request):
 
     payload = read_json(request)
     user = request.user if request.user.is_authenticated else None
+    user_id = payload.get('user_id')
     user_email = payload.get('user_email', '').strip().lower()
+    user_name = payload.get('user_name', '').strip() or 'Покупатель'
 
+    if user is None and user_id:
+        user = User.objects.filter(pk=user_id).first()
     if user is None and user_email:
         user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
+    if user is None and user_email:
+        try:
+            user = User.objects.create_user(
+                username=user_email,
+                email=user_email,
+                password=None,
+                first_name=user_name,
+            )
+        except IntegrityError:
+            user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
 
     if user is None:
         return JsonResponse({'detail': 'Войдите в аккаунт, чтобы отправить оптовую заявку'}, status=403)

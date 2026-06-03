@@ -2,12 +2,21 @@ import React, { useState } from 'react'
 import forestFooter from '../assets/forest-footer.png'
 import { api } from '../lib/api.js'
 
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('herbarium_user') || 'null')
+  } catch {
+    return null
+  }
+}
+
 export default function Footer({ navigate, user }) {
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [authNotice, setAuthNotice] = useState(false)
-  const contactValue = user ? [user.name, user.email].filter(Boolean).join(', ') : ''
+  const currentUser = user || getStoredUser()
+  const contactValue = currentUser ? [currentUser.name, currentUser.email].filter(Boolean).join(', ') : ''
   const [form, setForm] = useState({
     company: '',
     phone: '',
@@ -24,7 +33,9 @@ export default function Footer({ navigate, user }) {
   }
 
   const submitSupplyRequest = async () => {
-    if (!user) {
+    const requestUser = user || getStoredUser()
+
+    if (!requestUser) {
       setSent(false)
       setError('')
       setAuthNotice(true)
@@ -39,8 +50,10 @@ export default function Footer({ navigate, user }) {
         method: 'POST',
         body: JSON.stringify({
           ...form,
-          contact: form.contact || contactValue,
-          user_email: user.email,
+          contact: form.contact || [requestUser.name, requestUser.email].filter(Boolean).join(', '),
+          user_id: requestUser.id,
+          user_name: requestUser.name,
+          user_email: requestUser.email,
         }),
       })
       setSent(true)
