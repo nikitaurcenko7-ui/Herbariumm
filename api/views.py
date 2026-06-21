@@ -13,8 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Order, Product, SupplyRequest
 
-MAIN_ADMIN_EMAIL = 'admin@herbarium.ru'
-MAIN_ADMIN_USERNAME = 'admin@herbarium.ru'
+MAIN_ADMIN_EMAIL = 'admin@'
+MAIN_ADMIN_USERNAME = 'admin@'
 
 
 def product_payload(product):
@@ -78,7 +78,16 @@ def read_json(request):
 
 
 def is_valid_email(email):
-    return '@' in (email or '').strip()
+    value = (email or '').strip().lower()
+    if value == MAIN_ADMIN_EMAIL:
+        return True
+
+    parts = value.split('@')
+    if len(parts) != 2:
+        return False
+
+    name, domain = parts
+    return bool(name and '.' in domain and not domain.startswith('.') and not domain.endswith('.'))
 
 
 def is_valid_phone(phone):

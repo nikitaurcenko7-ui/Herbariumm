@@ -13,14 +13,14 @@ class Command(BaseCommand):
             call_command('loaddata', 'products', verbosity=0)
 
         user, created = User.objects.get_or_create(
-            username='admin@herbarium.ru',
-            defaults={'email': 'admin@herbarium.ru', 'first_name': 'admin'},
+            username='admin@',
+            defaults={'email': 'admin@', 'first_name': 'admin'},
         )
-        user.email = 'admin@herbarium.ru'
+        user.email = 'admin@'
         user.first_name = 'admin'
         user.is_staff = True
         user.is_superuser = True
         user.set_password('password')
         user.save()
 
-        self.stdout.write(self.style.SUCCESS('Demo data is ready. Login: admin@herbarium.ru / password'))
+        self.stdout.write(self.style.SUCCESS('Demo data is ready. Login: admin@ / password'))
