@@ -1,4 +1,6 @@
 import json
+import re
+import uuid
 from datetime import timedelta
 
 from django.contrib.auth import authenticate, login, logout
@@ -56,6 +58,24 @@ def read_json(request):
         return json.loads(request.body.decode('utf-8') or '{}')
     except json.JSONDecodeError:
         return {}
+
+
+def is_valid_email(email):
+    return '@' in (email or '').strip()
+
+
+def is_valid_phone(phone):
+    value = (phone or '').strip()
+    digits = re.sub(r'\D', '', value)
+    return len(digits) >= 10 and re.fullmatch(r'[\d\s()+-]+', value) is not None
+
+
+def make_tracking_number():
+    prefix = timezone.now().strftime('HB-%y%m%d')
+    while True:
+        number = f'{prefix}-{uuid.uuid4().hex[:6].upper()}'
+        if not Order.objects.filter(tracking_number=number).exists():
+            return number
 
 
 def products(request):
@@ -201,6 +221,9 @@ def login_view(request):
     email = payload.get('email', '').strip()
     password = payload.get('password', '')
 
+    if not is_valid_email(email):
+        return JsonResponse({'detail': 'Укажите корректный email с символом @'}, status=400)
+
     user_obj = User.objects.filter(email=email).first() or User.objects.filter(username=email).first()
     username = user_obj.username if user_obj else email
     user = authenticate(request, username=username, password=password)
@@ -224,6 +247,8 @@ def register_view(request):
 
     if not email or not password:
         return JsonResponse({'detail': 'Укажите email и пароль'}, status=400)
+    if not is_valid_email(email):
+        return JsonResponse({'detail': 'Укажите корректный email с символом @'}, status=400)
 
     try:
         user = User.objects.create_user(username=email, email=email, password=password, first_name=name)
@@ -248,16 +273,48 @@ def orders(request):
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
     payload = read_json(request)
+    phone = payload.get('phone', '').strip()
+
+    if not is_valid_phone(phone):
+        return JsonResponse({'detail': 'Укажите корректный номер телефона'}, status=400)
+
+    tracking_number = make_tracking_number()
     order = Order.objects.create(
         user=request.user if request.user.is_authenticated else None,
-        name=payload.get('name', ''),
-        phone=payload.get('phone', ''),
-        city=payload.get('city', ''),
-        address=payload.get('address', ''),
-        comment=payload.get('comment', ''),
-        payload=payload,
+        name=payload.get('name', '').strip(),
+        phone=phone,
+        city=payload.get('city', '').strip(),
+        address=payload.get('address', '').strip(),
+        tracking_number=tracking_number,
+        comment=payload.get('comment', '').strip(),
+        payload={**payload, 'tracking_number': tracking_number},
     )
-    return JsonResponse({'ok': True, 'order_id': order.id})
+    return JsonResponse({'ok': True, 'order_id': order.id, 'tracking_number': tracking_number}, status=201)
+
+
+@csrf_exempt
+def track_order(request):
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
+    payload = read_json(request)
+    tracking_number = payload.get('tracking_number', '').strip().upper()
+    if not tracking_number:
+        return JsonResponse({'detail': 'Введите трек-номер'}, status=400)
+
+    order = Order.objects.filter(tracking_number__iexact=tracking_number).first()
+    if order is None:
+        return JsonResponse({'detail': 'Заказ с таким трек-номером не найден'}, status=404)
+
+    return JsonResponse({
+        'order': {
+            'id': order.id,
+            'tracking_number': order.tracking_number,
+            'status': 'Заказ оформлен',
+            'city': order.city,
+            'created_at': order.created_at.strftime('%d.%m.%Y'),
+        }
+    })
 
 
 @csrf_exempt
@@ -289,10 +346,14 @@ def supply_requests(request):
     if user is None:
         return JsonResponse({'detail': 'Войдите в аккаунт, чтобы отправить оптовую заявку'}, status=403)
 
+    phone = payload.get('phone', '').strip()
+    if not is_valid_phone(phone):
+        return JsonResponse({'detail': 'Укажите корректный номер телефона'}, status=400)
+
     supply_request = SupplyRequest.objects.create(
         user=user,
         company=payload.get('company', '').strip(),
-        phone=payload.get('phone', '').strip(),
+        phone=phone,
         contact=payload.get('contact', '').strip(),
         volume=payload.get('volume', '').strip(),
         comment=payload.get('comment', '').strip(),

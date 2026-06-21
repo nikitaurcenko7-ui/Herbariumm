@@ -1,5 +1,6 @@
 import React from 'react'
-import { CheckCircle2, User } from 'lucide-react'
+import { User } from 'lucide-react'
+import TrackingBox from '../components/TrackingBox.jsx'
 
 export default function Profile({ user, navigate }) {
   if (!user) {
@@ -26,11 +27,7 @@ export default function Profile({ user, navigate }) {
           </div>
           <button onClick={() => navigate('catalog')} className="btn-primary mt-5 w-full">Повторить заказ</button>
           <div className="mt-3">
-            <CheckCircle2 className="mb-3 text-accent" />
-            <h3 className="font-bold">Отслеживание заказа</h3>
-            <p className="muted mt-2 text-sm">Введите трек-номер, чтобы узнать текущий статус доставки.</p>
-            <input className="mt-3" placeholder="Введите трек-номер" />
-            <button className="btn-primary mt-2 w-full">Проверить</button>
+            <TrackingBox />
           </div>
           {user.is_admin && <button onClick={() => navigate('admin')} className="btn-ghost mt-2 w-full">Админ панель</button>}
         </div>

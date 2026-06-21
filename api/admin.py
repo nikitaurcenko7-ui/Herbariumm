@@ -12,8 +12,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "phone", "city", "created_at")
-    search_fields = ("name", "phone", "city")
+    list_display = ("id", "tracking_number", "name", "phone", "city", "created_at")
+    search_fields = ("tracking_number", "name", "phone", "city")
     readonly_fields = ("created_at",)
 
 

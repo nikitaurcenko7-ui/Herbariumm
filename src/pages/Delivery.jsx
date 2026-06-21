@@ -1,6 +1,7 @@
 import React from 'react'
-import { CheckCircle2, Clock3, CreditCard, PackageCheck, Phone, Truck } from 'lucide-react'
+import { Clock3, CreditCard, PackageCheck, Phone, Truck } from 'lucide-react'
 import { FaqAccordion, InfoTile } from '../components/Cards.jsx'
+import TrackingBox from '../components/TrackingBox.jsx'
 import cdekLogo from '../assets/cdek.png'
 import boxberryLogo from '../assets/boxberry.png'
 import russianPostLogo from '../assets/russian-post.png'
@@ -26,11 +27,7 @@ export default function Delivery() {
       <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_1.8fr]">
         <InfoTile icon={Clock3} title="Сроки доставки" text="Москва и СПБ 1-2 дня, регионы 3-7 дней, Почта России 5-14 дней. Сроки указаны ориентировочно." />
         <div className="panel">
-          <CheckCircle2 className="mb-3 text-accent" />
-          <h3 className="font-bold">Отслеживание заказа</h3>
-          <p className="muted mt-2 text-sm">Введите трек-номер, чтобы узнать текущий статус доставки.</p>
-          <input className="mt-3" placeholder="Введите трек-номер" />
-          <button className="btn-primary mt-2 w-full">Проверить</button>
+          <TrackingBox />
         </div>
         <div className="panel">
           <h3 className="text-center font-bold">Наши партнеры по доставке</h3>

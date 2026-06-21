@@ -1412,6 +1412,44 @@ textarea {
   font-weight: 700;
 }
 
+.track-result,
+.track-status {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  padding: 0.8rem 0.9rem;
+}
+
+.track-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.track-result span,
+.track-status span,
+.track-status small {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.track-result strong,
+.track-status strong {
+  display: block;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.track-status {
+  margin-top: 0.75rem;
+}
+
+.track-status small {
+  display: block;
+  margin-top: 0.15rem;
+}
+
 .auth-screen {
   display: grid;
   min-height: calc(100vh - 170px);

@@ -25,6 +25,7 @@ class Order(models.Model):
     phone = models.CharField(max_length=40)
     city = models.CharField(max_length=120)
     address = models.CharField(max_length=255)
+    tracking_number = models.CharField(max_length=32, blank=True, db_index=True)
     comment = models.TextField(blank=True)
     payload = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

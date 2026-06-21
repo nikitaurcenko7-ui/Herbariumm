@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import forestFooter from '../assets/forest-footer.png'
 import { api } from '../lib/api.js'
+import { isPhoneValid, PHONE_ERROR } from '../utils/validation.js'
 
 function getStoredUser() {
   try {
@@ -43,6 +44,12 @@ export default function Footer({ navigate, user }) {
       return
     }
 
+    if (!isPhoneValid(form.phone)) {
+      setSent(false)
+      setError(PHONE_ERROR)
+      return
+    }
+
     setSending(true)
     setError('')
     try {
@@ -78,7 +85,7 @@ export default function Footer({ navigate, user }) {
           <h3 className="font-bold">Заявка на крупную поставку</h3>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <input placeholder="Компания или ИП" value={form.company} onChange={(event) => setField('company', event.target.value)} />
-            <input placeholder="Телефон" value={form.phone} onChange={(event) => setField('phone', event.target.value)} />
+            <input type="tel" placeholder="Телефон" value={form.phone} onChange={(event) => setField('phone', event.target.value)} />
             <input key={contactValue || 'guest-contact'} placeholder="Контакт" value={form.contact || contactValue} onChange={(event) => setField('contact', event.target.value)} />
             <input placeholder="Плановый объем в месяц" value={form.volume} onChange={(event) => setField('volume', event.target.value)} />
           </div>
