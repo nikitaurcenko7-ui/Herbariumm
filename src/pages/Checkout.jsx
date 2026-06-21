@@ -22,6 +22,11 @@ export default function Checkout({ navigate, setCart, cart, user }) {
 
   const submit = async () => {
     setError('')
+    if (!user) {
+      setError('Войдите или зарегистрируйтесь, чтобы оформить заказ')
+      return
+    }
+
     if (!isPhoneValid(form.phone)) {
       setError(PHONE_ERROR)
       return
@@ -61,6 +66,19 @@ export default function Checkout({ navigate, setCart, cart, user }) {
             <strong>{order.tracking_number}</strong>
           </div>
           <button className="btn-primary mt-4 w-full" onClick={() => navigate('profile')}>Перейти в кабинет</button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <div className="panel">
+          <h1 className="page-title">Оформление заказа</h1>
+          <p className="muted mt-2 text-sm">Заказы доступны только зарегистрированным пользователям.</p>
+          <button className="btn-primary mt-4 w-full" onClick={() => navigate('register')}>Зарегистрироваться</button>
+          <button className="btn-ghost mt-2 w-full" onClick={() => navigate('login')}>Войти</button>
         </div>
       </div>
     )

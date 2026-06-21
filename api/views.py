@@ -291,15 +291,13 @@ def orders(request):
         user_id = request.GET.get('user_id')
         user_email = request.GET.get('user_email', '').strip().lower()
 
-        if user is None and user_id:
-            user = User.objects.filter(pk=user_id).first()
-        if user is None and user_email:
-            user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
+        if user is None and user_id and user_email:
+            user = User.objects.filter(pk=user_id, email=user_email).first() or User.objects.filter(pk=user_id, username=user_email).first()
 
         orders_qs = Order.objects.none()
         if user is not None:
             orders_qs = Order.objects.filter(user=user)
-        if user_email:
+        if user is not None and user_email:
             orders_qs = orders_qs | Order.objects.filter(payload__user_email=user_email)
 
         orders_qs = orders_qs.distinct().order_by('-created_at')
@@ -314,10 +312,11 @@ def orders(request):
     user_id = payload.get('user_id')
     user_email = payload.get('user_email', '').strip().lower()
 
-    if user is None and user_id:
-        user = User.objects.filter(pk=user_id).first()
-    if user is None and user_email:
-        user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
+    if user is None and user_id and user_email:
+        user = User.objects.filter(pk=user_id, email=user_email).first() or User.objects.filter(pk=user_id, username=user_email).first()
+
+    if user is None:
+        return JsonResponse({'detail': 'Войдите или зарегистрируйтесь, чтобы оформить заказ'}, status=403)
 
     if not is_valid_phone(phone):
         return JsonResponse({'detail': 'Укажите корректный номер телефона'}, status=400)

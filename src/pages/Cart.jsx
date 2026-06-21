@@ -1,8 +1,15 @@
 import React from 'react'
 import { X } from 'lucide-react'
 
-export default function Cart({ cart, setCart, navigate }) {
+export default function Cart({ cart, setCart, navigate, user }) {
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const checkout = () => {
+    if (!user) {
+      navigate('register')
+      return
+    }
+    navigate('checkout')
+  }
 
   return (
     <div>
@@ -31,7 +38,8 @@ export default function Cart({ cart, setCart, navigate }) {
 
         <aside className="panel h-fit">
           <h2 className="text-xl font-bold">Итого: {total} ₽</h2>
-          <button disabled={!cart.length} onClick={() => navigate('checkout')} className="btn-primary mt-4 w-full disabled:opacity-50">
+          {!user && cart.length > 0 && <p className="muted mt-3 text-sm">Чтобы оформить заказ, войдите или зарегистрируйтесь.</p>}
+          <button disabled={!cart.length} onClick={checkout} className="btn-primary mt-4 w-full disabled:opacity-50">
             Оформить заказ
           </button>
         </aside>
