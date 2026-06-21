@@ -4,6 +4,7 @@ import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
 import './index.css'
 
+import CookieConsent from './components/CookieConsent.jsx'
 import Layout from './components/Layout.jsx'
 import { ProductModal } from './components/Product.jsx'
 import { useRoute } from './hooks/useRoute.js'
@@ -131,18 +132,21 @@ function App() {
   }
 
   return (
-    <Layout
-      route={route}
-      navigate={navigate}
-      user={user}
-      onLogout={logoutUser}
-      cartCount={cart.reduce((sum, item) => sum + item.qty, 0)}
-      theme={theme}
-      toggleTheme={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
-    >
-      {pages[route] || <Home {...pageProps} />}
-      <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAdd={addProductFromModal} />
-    </Layout>
+    <>
+      <Layout
+        route={route}
+        navigate={navigate}
+        user={user}
+        onLogout={logoutUser}
+        cartCount={cart.reduce((sum, item) => sum + item.qty, 0)}
+        theme={theme}
+        toggleTheme={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+      >
+        {pages[route] || <Home {...pageProps} />}
+        <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAdd={addProductFromModal} />
+      </Layout>
+      <CookieConsent />
+    </>
   )
 }
 

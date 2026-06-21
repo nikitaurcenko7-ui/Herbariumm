@@ -74,6 +74,48 @@ button {
   cursor: pointer;
 }
 
+.cookie-consent {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 90;
+  display: flex;
+  max-width: 720px;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1rem;
+  color: var(--text);
+}
+
+.cookie-consent strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.cookie-consent p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.cookie-consent button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--accent-2), #66ce72);
+  color: #092012;
+  font-weight: 900;
+  padding: 0.68rem 1rem;
+}
+
 input,
 select,
 textarea {
@@ -105,6 +147,17 @@ select option {
 textarea {
   min-height: 88px;
   resize: vertical;
+}
+
+@media (max-width: 640px) {
+  .cookie-consent {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cookie-consent button {
+    width: 100%;
+  }
 }
 
 .botanical-bg {
