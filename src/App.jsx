@@ -69,7 +69,31 @@ function App() {
 
   const refreshProducts = () => api('/products/').then((data) => setProducts(data.products)).catch(() => null)
 
+  const requireAccountForCart = () => {
+    Swal.fire({
+      toast: true,
+      position: 'top',
+      icon: 'info',
+      title: 'Нужен аккаунт',
+      text: 'Войдите или зарегистрируйтесь, чтобы добавить товар в корзину.',
+      showConfirmButton: false,
+      timer: 3600,
+      timerProgressBar: true,
+      customClass: {
+        popup: 'herb-toast',
+        title: 'herb-toast-title',
+        timerProgressBar: 'herb-toast-progress'
+      }
+    })
+    navigate('register')
+  }
+
   const addToCart = (product, qty = 1) => {
+    if (!user) {
+      requireAccountForCart()
+      return false
+    }
+
     setCart((items) => {
       const current = items.find((item) => item.id === product.id)
       if (current) {
@@ -77,10 +101,15 @@ function App() {
       }
       return [...items, { ...product, qty }]
     })
+    return true
   }
 
   const addProductFromModal = (product, qty) => {
-    addToCart(product, qty)
+    if (!addToCart(product, qty)) {
+      setSelectedProduct(null)
+      return
+    }
+
     setSelectedProduct(null)
     Swal.fire({
       toast: true,
@@ -100,7 +129,8 @@ function App() {
   }
 
   const quickBuyProduct = (product) => {
-    addToCart(product, 1)
+    if (!addToCart(product, 1)) return
+
     Swal.fire({
       toast: true,
       position: 'top',
