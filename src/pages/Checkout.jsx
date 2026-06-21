@@ -2,7 +2,18 @@ import React, { useState } from 'react'
 import { api } from '../lib/api.js'
 import { isPhoneValid, PHONE_ERROR } from '../utils/validation.js'
 
-export default function Checkout({ navigate, setCart, cart }) {
+function saveOrderTrack(trackingNumber) {
+  try {
+    const current = JSON.parse(localStorage.getItem('herbarium_order_tracks') || '[]')
+    const next = [trackingNumber, ...current.filter((item) => item !== trackingNumber)].slice(0, 20)
+    localStorage.setItem('herbarium_order_tracks', JSON.stringify(next))
+    localStorage.setItem('herbarium_last_track', trackingNumber)
+  } catch {
+    localStorage.setItem('herbarium_last_track', trackingNumber)
+  }
+}
+
+export default function Checkout({ navigate, setCart, cart, user }) {
   const [form, setForm] = useState({ name: '', phone: '', city: '', address: '', comment: '' })
   const [error, setError] = useState('')
   const [order, setOrder] = useState(null)
@@ -17,8 +28,17 @@ export default function Checkout({ navigate, setCart, cart }) {
     }
 
     try {
-      const data = await api('/orders/', { method: 'POST', body: JSON.stringify({ ...form, items: cart }) })
-      localStorage.setItem('herbarium_last_track', data.tracking_number)
+      const data = await api('/orders/', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...form,
+          items: cart,
+          user_id: user?.id,
+          user_name: user?.name,
+          user_email: user?.email,
+        }),
+      })
+      saveOrderTrack(data.tracking_number)
       setOrder(data)
       setCart([])
     } catch (err) {

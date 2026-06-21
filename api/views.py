@@ -13,8 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Order, Product, SupplyRequest
 
-MAIN_ADMIN_EMAIL = 'admin@herbarium.ru'
-MAIN_ADMIN_USERNAME = 'admin'
+MAIN_ADMIN_EMAIL = 'admin@'
+MAIN_ADMIN_USERNAME = 'admin@'
 
 
 def product_payload(product):
@@ -28,6 +28,23 @@ def product_payload(product):
         'tone': product.tone,
         'image_url': product.image_url,
         'description': product.description,
+    }
+
+
+def order_payload(order):
+    items = order.payload.get('items', [])
+    total = sum(int(item.get('price') or 0) * int(item.get('qty') or 1) for item in items)
+    return {
+        'id': order.id,
+        'tracking_number': order.tracking_number,
+        'status': 'Заказ оформлен',
+        'name': order.name,
+        'phone': order.phone,
+        'city': order.city,
+        'address': order.address,
+        'created_at': order.created_at.strftime('%d.%m.%Y'),
+        'items_count': sum(int(item.get('qty') or 1) for item in items),
+        'total': total,
     }
 
 
@@ -269,25 +286,52 @@ def logout_view(request):
 
 @csrf_exempt
 def orders(request):
+    if request.method == 'GET':
+        user = request.user if request.user.is_authenticated else None
+        user_id = request.GET.get('user_id')
+        user_email = request.GET.get('user_email', '').strip().lower()
+
+        if user is None and user_id:
+            user = User.objects.filter(pk=user_id).first()
+        if user is None and user_email:
+            user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
+
+        orders_qs = Order.objects.none()
+        if user is not None:
+            orders_qs = Order.objects.filter(user=user)
+        if user_email:
+            orders_qs = orders_qs | Order.objects.filter(payload__user_email=user_email)
+
+        orders_qs = orders_qs.distinct().order_by('-created_at')
+        return JsonResponse({'orders': [order_payload(order) for order in orders_qs]})
+
     if request.method != 'POST':
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
     payload = read_json(request)
     phone = payload.get('phone', '').strip()
+    user = request.user if request.user.is_authenticated else None
+    user_id = payload.get('user_id')
+    user_email = payload.get('user_email', '').strip().lower()
+
+    if user is None and user_id:
+        user = User.objects.filter(pk=user_id).first()
+    if user is None and user_email:
+        user = User.objects.filter(email=user_email).first() or User.objects.filter(username=user_email).first()
 
     if not is_valid_phone(phone):
         return JsonResponse({'detail': 'Укажите корректный номер телефона'}, status=400)
 
     tracking_number = make_tracking_number()
     order = Order.objects.create(
-        user=request.user if request.user.is_authenticated else None,
+        user=user,
         name=payload.get('name', '').strip(),
         phone=phone,
         city=payload.get('city', '').strip(),
         address=payload.get('address', '').strip(),
         tracking_number=tracking_number,
         comment=payload.get('comment', '').strip(),
-        payload={**payload, 'tracking_number': tracking_number},
+        payload={**payload, 'tracking_number': tracking_number, 'user_email': user_email},
     )
     return JsonResponse({'ok': True, 'order_id': order.id, 'tracking_number': tracking_number}, status=201)
 

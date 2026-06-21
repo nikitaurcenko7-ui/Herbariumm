@@ -158,6 +158,15 @@ textarea {
   .cookie-consent button {
     width: 100%;
   }
+
+  .order-history-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .order-history-meta {
+    text-align: left;
+  }
 }
 
 .botanical-bg {
@@ -957,6 +966,50 @@ textarea {
 .profile-row strong {
   display: block;
   margin-top: 0.25rem;
+}
+
+.profile-orders {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.order-history-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.order-history-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.34);
+  padding: 0.85rem;
+}
+
+:root[data-theme='dark'] .order-history-card {
+  background: rgba(7, 23, 13, 0.38);
+}
+
+.order-history-card span,
+.order-history-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.order-history-card strong {
+  display: block;
+  margin-top: 0.18rem;
+  font-weight: 900;
+}
+
+.order-history-meta {
+  flex: 0 0 auto;
+  text-align: right;
 }
 
 .faq-panel {

@@ -4,7 +4,7 @@ import { harvestSlides, scrollToSupplyForm } from '../data/siteData.js'
 import { ProductGrid } from '../components/Product.jsx'
 import { InfoCard } from '../components/Cards.jsx'
 
-export default function Home({ navigate, addToCart, products, user }) {
+export default function Home({ navigate, addToCart, quickBuy, products, user }) {
   const [harvestIndex, setHarvestIndex] = useState(0)
   const slide = harvestSlides[harvestIndex]
 
@@ -62,7 +62,7 @@ export default function Home({ navigate, addToCart, products, user }) {
 
       <section className="reveal-block">
         <h2 className="section-title mb-4">Популярные товары из каталога</h2>
-        <ProductGrid products={popular} addToCart={openFromHome} />
+        <ProductGrid products={popular} addToCart={openFromHome} onBuy={quickBuy} />
       </section>
 
       <section className="reveal-block">

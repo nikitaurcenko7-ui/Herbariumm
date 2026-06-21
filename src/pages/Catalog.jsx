@@ -34,7 +34,7 @@ const categoryMatches = (productCategory, selectedCategory) => {
   return Boolean(group?.options.includes(productCategory))
 }
 
-export default function Catalog({ addToCart, products, loading }) {
+export default function Catalog({ addToCart, quickBuy, products, loading }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Все категории')
   const [form, setForm] = useState('Все формы')
@@ -62,7 +62,7 @@ export default function Catalog({ addToCart, products, loading }) {
         </aside>
         <section>
           {loading && <p className="muted text-sm">Загружаем товары из SQLite...</p>}
-          {!loading && filtered.length > 0 && <ProductGrid products={filtered} addToCart={addToCart} />}
+          {!loading && filtered.length > 0 && <ProductGrid products={filtered} addToCart={addToCart} onBuy={quickBuy} />}
           {!loading && filtered.length === 0 && <p className="muted text-sm">По вашим параметрам ничего не найдено.</p>}
         </section>
       </div>

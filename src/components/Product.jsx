@@ -33,12 +33,13 @@ function ProductDescription({ description }) {
   )
 }
 
-export function ProductGrid({ products, addToCart }) {
-  return <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{products.map((product, index) => <ProductCard key={product.id} product={product} addToCart={addToCart} index={index} />)}</div>
+export function ProductGrid({ products, addToCart, onBuy }) {
+  return <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{products.map((product, index) => <ProductCard key={product.id} product={product} addToCart={addToCart} onBuy={onBuy} index={index} />)}</div>
 }
 
-export function ProductCard({ product, addToCart, index = 0 }) {
+export function ProductCard({ product, addToCart, onBuy, index = 0 }) {
   const openProduct = () => addToCart(product)
+  const buyProduct = () => (onBuy || addToCart)(product)
 
   return (
     <article className="product-card reveal-item" style={{ '--delay': `${index * 70}ms`, '--from-x': index % 2 === 0 ? '-36px' : '36px' }}>
@@ -52,7 +53,7 @@ export function ProductCard({ product, addToCart, index = 0 }) {
           <strong>{product.price} ₽</strong>
           <div className="product-card-actions">
             <button onClick={openProduct} className="btn-ghost small">Подробнее</button>
-            <button onClick={openProduct} className="btn-primary small">Купить</button>
+            <button onClick={buyProduct} className="btn-primary small">В корзину</button>
           </div>
         </div>
       </div>

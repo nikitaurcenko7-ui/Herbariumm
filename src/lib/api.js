@@ -2,7 +2,7 @@ export const API_BASE = 'https://herbariumm.onrender.com/api'
 
 export function normalizeUser(user) {
   if (!user) return null
-  return user.email === 'admin@herbarium.ru' ? { ...user, is_admin: true } : user
+  return user.email === 'admin@' ? { ...user, is_admin: true } : user
 }
 
 export async function api(path, options = {}) {

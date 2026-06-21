@@ -99,6 +99,25 @@ function App() {
     })
   }
 
+  const quickBuyProduct = (product) => {
+    addToCart(product, 1)
+    Swal.fire({
+      toast: true,
+      position: 'top',
+      icon: 'success',
+      title: 'Добавлено в корзину',
+      text: product.title,
+      showConfirmButton: false,
+      timer: 2600,
+      timerProgressBar: true,
+      customClass: {
+        popup: 'herb-toast',
+        title: 'herb-toast-title',
+        timerProgressBar: 'herb-toast-progress'
+      }
+    })
+  }
+
   const logoutUser = async () => {
     await api('/logout/', { method: 'POST' }).catch(() => null)
     setUser(null)
@@ -109,6 +128,7 @@ function App() {
   const pageProps = {
     navigate,
     addToCart: setSelectedProduct,
+    quickBuy: quickBuyProduct,
     setUser,
     user,
     cart,
@@ -128,7 +148,7 @@ function App() {
     profile: <Profile {...pageProps} />,
     admin: <AdminPanel api={api} navigate={navigate} user={user} refreshProducts={refreshProducts} />,
     cart: <Cart {...pageProps} />,
-    checkout: <Checkout navigate={navigate} setCart={setCart} cart={cart} />
+    checkout: <Checkout navigate={navigate} setCart={setCart} cart={cart} user={user} />
   }
 
   return (
