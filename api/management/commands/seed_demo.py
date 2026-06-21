@@ -9,8 +9,8 @@ class Command(BaseCommand):
     help = 'Load demo products and create demo admin user.'
 
     def handle(self, *args, **options):
-        Product.objects.all().delete()
-        call_command('loaddata', 'products', verbosity=0)
+        if not Product.objects.exists():
+            call_command('loaddata', 'products', verbosity=0)
 
         user, created = User.objects.get_or_create(
             username='admin@',
