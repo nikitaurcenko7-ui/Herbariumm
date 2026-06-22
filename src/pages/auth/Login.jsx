@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { api, normalizeUser } from '../../lib/api.js'
-import { EMAIL_ERROR, isEmailValid } from '../../utils/validation.js'
+import { EMAIL_ERROR, isEmailValid, normalizeEmailLogin } from '../../utils/validation.js'
 
 export default function Login({ setUser, navigate }) {
   const [email, setEmail] = useState('')
@@ -9,13 +9,15 @@ export default function Login({ setUser, navigate }) {
 
   const submit = async () => {
     setError('')
-    if (!isEmailValid(email)) {
+    const loginEmail = normalizeEmailLogin(email)
+
+    if (!isEmailValid(loginEmail)) {
       setError(EMAIL_ERROR)
       return
     }
 
     try {
-      const data = await api('/login/', { method: 'POST', body: JSON.stringify({ email, password }) })
+      const data = await api('/login/', { method: 'POST', body: JSON.stringify({ email: loginEmail, password }) })
       const normalized = normalizeUser(data.user)
       setUser(normalized)
       localStorage.setItem('herbarium_user', JSON.stringify(normalized))
@@ -29,7 +31,7 @@ export default function Login({ setUser, navigate }) {
     <div className="auth-screen">
       <div className="panel auth-card">
         <h1 className="page-title">Вход в кабинет</h1>
-        <input className="mt-5" type="email" placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} />
+        <input className="mt-5" type="text" placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} />
         <input className="mt-2" placeholder="Пароль" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
         {error && <p className="error-text">{error}</p>}
         <button className="btn-primary mt-4 w-full" onClick={submit}>Войти</button>

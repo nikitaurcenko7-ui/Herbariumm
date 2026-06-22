@@ -1,7 +1,13 @@
 export const ADMIN_LOGIN = 'admin@'
 
-export function isEmailValid(email) {
+export function normalizeEmailLogin(email) {
   const value = String(email || '').trim().toLowerCase()
+  if (value.replace(/\.+$/, '') === ADMIN_LOGIN) return ADMIN_LOGIN
+  return value
+}
+
+export function isEmailValid(email) {
+  const value = normalizeEmailLogin(email)
   if (value === ADMIN_LOGIN) return true
 
   const parts = value.split('@')

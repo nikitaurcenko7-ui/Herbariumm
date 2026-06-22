@@ -77,8 +77,15 @@ def read_json(request):
         return {}
 
 
-def is_valid_email(email):
+def normalize_email_login(email):
     value = (email or '').strip().lower()
+    if value.rstrip('.') == MAIN_ADMIN_EMAIL:
+        return MAIN_ADMIN_EMAIL
+    return value
+
+
+def is_valid_email(email):
+    value = normalize_email_login(email)
     if value == MAIN_ADMIN_EMAIL:
         return True
 
@@ -244,7 +251,7 @@ def login_view(request):
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
     payload = read_json(request)
-    email = payload.get('email', '').strip()
+    email = normalize_email_login(payload.get('email', ''))
     password = payload.get('password', '')
 
     if not is_valid_email(email):
@@ -268,7 +275,7 @@ def register_view(request):
 
     payload = read_json(request)
     name = payload.get('name', '').strip() or 'Покупатель'
-    email = payload.get('email', '').strip().lower()
+    email = normalize_email_login(payload.get('email', ''))
     password = payload.get('password', '')
 
     if not email or not password:
