@@ -31,7 +31,7 @@ export default function Login({ setUser, navigate }) {
     <div className="auth-screen">
       <div className="panel auth-card">
         <h1 className="page-title">Вход в кабинет</h1>
-        <input className="mt-5" type="text" placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} />
+        <input className="mt-5" type="email" placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} />
         <input className="mt-2" placeholder="Пароль" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
         {error && <p className="error-text">{error}</p>}
         <button className="btn-primary mt-4 w-full" onClick={submit}>Войти</button>

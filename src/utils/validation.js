@@ -1,14 +1,11 @@
-export const ADMIN_LOGIN = 'admin@'
+export const ADMIN_LOGIN = 'admin@herbarium.ru'
 
 export function normalizeEmailLogin(email) {
-  const value = String(email || '').trim().toLowerCase()
-  if (value.replace(/\.+$/, '') === ADMIN_LOGIN) return ADMIN_LOGIN
-  return value
+  return String(email || '').trim().toLowerCase()
 }
 
 export function isEmailValid(email) {
   const value = normalizeEmailLogin(email)
-  if (value === ADMIN_LOGIN) return true
 
   const parts = value.split('@')
   if (parts.length !== 2) return false
